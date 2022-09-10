@@ -30,7 +30,7 @@ If you wish to try it out today,
 3. While the server is running, make a POST request with a JSON with english strings that will be translated.
   - Sample POST request
   ```bash
-  curl http://localhost:1234/translate --include --header "Content-Type: application/json" --data '{"HELLO": "hello this is rakshith", "title": "My blog post"}'
+  curl http://localhost:1234/translate --include --header "Content-Type: application/json" --data '{"HELLO": "Hello, this is rakshith", "tITLE": "the coolest developer tool"}'
   ```
 
   - Sample JSON data
