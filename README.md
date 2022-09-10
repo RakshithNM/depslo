@@ -9,7 +9,7 @@ A software product that supports multiple languages has the vulnerability of hav
 ## How does this solve that problem?
 The tool tries to mitigate those problems by performing psuedo localization of english sentences. The developers can hit the endpoint with the JSON of translations in english and get back the psuedo localized JSON of all the strings.
 
-## Features
+## What is possible today?
 * Endpoint to pass a JSON with english strings and get back a JSON with psuedo localized strings
 
 ## To Implement
