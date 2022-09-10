@@ -1,0 +1,2 @@
+# depslo
+Psuedo Localization Tool
