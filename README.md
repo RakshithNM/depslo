@@ -4,9 +4,9 @@
 Â Psuedo Localization Tool
 
 ## Why?
-A software that is available in multiple languages is usually designed and developed in one language. One the developement is done of that iteration, all the finalised texts are translated by translators who are unaware of the layout constraints in the design. This can lead to broken layout, or too much white space in some languages.
+A software that is available in multiple languages is usually designed and developed in one language(usually english). Once the developement is done of of a feature, all the finalised texts are translated by translators who are unaware of the layout constraints in the design and no effort is made to make the translated strings more concise if the they don't sit well in the layout. This can lead to broken layout, or too much white space while the product is presented in some languages.
 
-A software product that supports multiple languages has the vulnerability of having its layout broken during each release as new text is added. This tool attempts aid developers find these issues during the developement process by trying to suggesting a alternative lengthened strings in psudeo localized format.
+A software product that supports multiple languages has the vulnerability of having its layout broken during each release as new text is added. This tool attempts to aid developers find these issues during the developement process by trying to suggesting a alternative elongated strings in psuedo localized format. It is important for developers to still make out what the original text was and this is taken care by this tool.
 
 ## How does this solve that problem?
 The tool tries to mitigate those problems by performing psuedo localization of english sentences. The developers can hit the endpoint with the JSON of translations in english and get back the psuedo localized JSON of all the strings.
