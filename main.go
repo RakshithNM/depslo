@@ -36,6 +36,7 @@ func elongateToLength(inString string, inLength int) string {
 	currentLength := len(inString)
 	var localElongatedString string
 	count := 1
+	// 💩
 	if currentLength == 0 {
 		fmt.Println("ERROR: Empty string, nothing to do!")
 		return inString
