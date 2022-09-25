@@ -1,4 +1,4 @@
-module depslo
+module github.com/RakshithNM/depslo
 
 go 1.19
 
