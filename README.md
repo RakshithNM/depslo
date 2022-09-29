@@ -9,26 +9,30 @@ A software that is available in multiple languages is usually designed and devel
 A software product that supports multiple languages has the vulnerability of having its layout broken during each release as new text is added. This tool attempts to aid developers find these issues during the developement process by trying to suggesting a alternative elongated strings in psuedo localized format. It is important for developers to still make out what the original text was and this is taken care by this tool.
 
 ## How does this solve that problem?
-The tool tries to mitigate those problems by performing psuedo localization of english sentences. The developers can hit the endpoint with the JSON of translations in english and get back the psuedo localized JSON of all the strings.
+The tool tries to mitigate those problems by performing psuedo localization of english sentences.
+- The developers can hit the endpoint with the JSON of translations in english and get back the psuedo localized JSON of all the strings.
+- The developers can use the command line utility to pass an entire JSON file that has english translations(see `test/cli/test.json`) and get back Psuedo Localized files for all keys.
 
 ## What is possible today?
-* Endpoint to pass a JSON with english strings and get back a JSON with psuedo localized strings
+* Endpoint to pass a JSON with english strings and get back a JSON with psuedo localized strings.
+* Command line utility to psuedo localize entire JSON files.
 
 ## To Implement
-* Be able to send a JSON file with english translation and get back a JSON file with psudeo localized strings
-* Run on change to JSON file with english translation.
+* Run on change to JSON file with english translation and generate psuedo localized file.
 * Psuedo localization based on language locale, ideally based on locale in file name.
 
 ## To Research
-* Research into optimum string elongation and contraction overall with respect to English in global languages
-* Research into optimum string elongation and contraction in specific languages with respect to English
+* Research into optimum string elongation and contraction overall with respect to English in global languages.
+* Research into optimum string elongation and contraction in specific languages with respect to English.
 
 ## For the curious
 If you wish to try it out today,
 
-1. Clone the repo, navigate to the `depslo` directory
-2. Run `./run.sh`, the server is running now.
-  - Can be verified by `curl http://localhost:1234/ping`, should output `pong`
+To try the server
+-----------------
+1. Clone the repo, navigate to the `depslo` directory.
+2. Run `./scripts/serve.sh`, the server is running now.
+  - Can be verified by `curl http://localhost:1234/ping`, should output `pong`.
 3. While the server is running, make a POST request with a JSON with english strings that will be translated.
   - Sample POST request
   ```bash
@@ -44,3 +48,11 @@ If you wish to try it out today,
     ....
   }
   ```
+
+To try the cli
+--------------
+1. Clone the repo, navigate to the `depslo` directory.
+2. `cd cmd`.
+3. `go run depslo.go ../test/cli/test.json`.
+  - It should output: `The psuedo local converted JSON file is at depslo.json`.
+4. You can now see that the `depslo.json` has psuedo localized content.
