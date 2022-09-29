@@ -1,3 +1,6 @@
+/*
+ * DEPSLO core
+ */
 package core
 
 import (
@@ -24,6 +27,7 @@ func proposeLength(inString string) int {
 		return LENGTHINCREASEMAP[key][1]
 	}
 	// proposing longest length
+	// TODO: maybe should be randomised to return a number within the range(pending research)
 	return LENGTHINCREASEMAP[10][1]
 }
 
@@ -46,7 +50,7 @@ func elongateToLength(inString string, inLength int) string {
 	return localElongatedString
 }
 
-// psuedoLocalize the JSON
+// PsuedoLocalize the JSON
 func PsuedoLocalize(inJSON map[string]string) map[string]string {
 	for i := range inJSON {
 		stringToTranslate := inJSON[i]
