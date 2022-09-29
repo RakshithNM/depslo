@@ -1,3 +1,4 @@
+// DEPSLO Command line utility tests
 package main
 
 // Importing all the required packages for our tests to work
@@ -11,6 +12,7 @@ import (
 	"testing"
 )
 
+// Test the getFileData function
 func Test_getFileData(t *testing.T) {
 	// Defining our test slice. Each unit test should have the following properties:
 	tests := []struct {
@@ -23,6 +25,7 @@ func Test_getFileData(t *testing.T) {
 		{"No parameters", "", true, []string{"depslo"}},
 	}
 
+	// Looping over the tests struct
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Saving the original os.Args reference
@@ -46,8 +49,9 @@ func Test_getFileData(t *testing.T) {
 	}
 }
 
+// Testing teh checkIfValidFile function
 func Test_checkIfValidFile(t *testing.T) {
-	// Creating a temporal and empty CSV file
+	// Creating a temporal and empty JSON file
 	tmpfile, err := ioutil.TempFile("", "tester.*.json")
 	if err != nil {
 		panic(err) // This should never happen
@@ -82,16 +86,17 @@ func Test_checkIfValidFile(t *testing.T) {
 	}
 }
 
+// Testing the processJSONFile function
 func Test_processJSONFile(t *testing.T) {
-	// Defining the maps we're expenting to get from our function
+	// Defining the map we're expenting to get from our function
 	validTestJSONData := map[string]string{
 		"HELLO": "Hello this is depslo",
 		"TITLE": "The coolest developer tool",
 	}
 
+	// Validate the map data
 	validJSON, marshalErr := json.Marshal(validTestJSONData)
 	if marshalErr != nil {
-		fmt.Printf("ERROR")
 		fmt.Printf("%v\n", marshalErr)
 	}
 
@@ -108,15 +113,21 @@ func Test_processJSONFile(t *testing.T) {
 			tmpfile, fileErr := ioutil.TempFile("", "valid.*.json")
 			check(fileErr)
 
-			defer os.Remove(tmpfile.Name())                         // Removing the CSV test file before living
-			_, writeErr := tmpfile.WriteString(fmt.Sprint(tt.data)) // Writing the content of the CSV test file
+			// Removing the JSON test file before living
+			defer os.Remove(tmpfile.Name())
+
+			// Writing the content of the JSON test file
+			_, writeErr := tmpfile.WriteString(fmt.Sprint(tt.data))
 			if writeErr != nil {
 				fmt.Printf("The write error: %v\n", writeErr)
 			}
-			tmpfile.Sync() // Persisting data on disk
+
+			// Persisting data on disk
+			tmpfile.Sync()
 
 			filePath := tmpfile.Name()
 
+			// Check if the valid JSON file created is actually valid using our function
 			jsonData, err := processJSONFile(filePath)
 
 			if err == nil {
