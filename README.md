@@ -1,0 +1,2 @@
+# depslo
+A psuedolocalization tool
