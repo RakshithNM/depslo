@@ -6,7 +6,18 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"unicode/utf8"
 )
+
+func transformTextToLength(s string, targetLen int) string {
+	if utf8.RuneCountInString(s) >= targetLen {
+		return s
+	}
+	paddingChar := '⬤' // or any filler
+	diff := targetLen - utf8.RuneCountInString(s)
+	padding := strings.Repeat(string(paddingChar), diff)
+	return s + padding
+}
 
 // advanced pseudo localized text generation
 func generatePseudoText(originalText string, expansionRate float64) string {
@@ -15,30 +26,22 @@ func generatePseudoText(originalText string, expansionRate float64) string {
 	}
 
 	// Calculate target length
-	targetLength := int(float64(len(originalText)) * expansionRate)
+	targetLength := int(float64(utf8.RuneCountInString(originalText)) * expansionRate)
 
-	// Generate pseudo text
-	result := strings.Builder{}
+	// Generate pseudo-translated string
+	var translatedBuilder strings.Builder
 	for _, s := range originalText {
-		key := rune(s)
-		_, isPresent := LETTERS[key]
-		if isPresent {
-			result.WriteRune(LETTERS[key])
+		if val, ok := LETTERS[s]; ok {
+			translatedBuilder.WriteRune(val)
+		} else {
+			translatedBuilder.WriteRune(s)
 		}
 	}
-	var elongatedString string
-	translatedString := result.String()
-	fmt.Println(translatedString, len(translatedString), "1")
-	if len(translatedString) > 0 {
-		elongatedString = elongateToLength(translatedString, targetLength)
-		fmt.Println(elongatedString, "2")
-	} else {
-		fmt.Println("here")
-		elongatedString = translatedString
-	}
-	fmt.Println(elongatedString, "3")
-	result.WriteString(elongatedString)
-	return result.String()
+	translated := translatedBuilder.String()
+
+	// Elongate to target length
+	elongated := transformTextToLength(translated, targetLength)
+	return elongated
 }
 
 // PseudoLocalizeAdvanced - Advanced pseudolocalization function
@@ -56,7 +59,6 @@ func PseudoLocalizeAdvanced(inJSON map[string]string, inLanguage string, inConte
 	// Get language configuration
 	config := GetDefaultConfig()
 	langConfig, exists := config.Languages[language]
-	fmt.Println(langConfig, "1")
 	if !exists {
 		return nil
 	}
@@ -65,7 +67,7 @@ func PseudoLocalizeAdvanced(inJSON map[string]string, inLanguage string, inConte
 	pseudoStrings := make(map[string]string)
 
 	for key, text := range inJSON {
-		expansionRate := langConfig.CalculateExpansionRate(len(text), contentType)
+		expansionRate := langConfig.CalculateExpansionRate(utf8.RuneCountInString(text), contentType)
 		pseudoText := generatePseudoText(text, expansionRate)
 
 		pseudoStrings[key] = pseudoText
