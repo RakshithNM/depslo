@@ -49,7 +49,6 @@ To try the server
     "language": "de",
     "content_type": "ui" }'
   ```
-
 ```
   - Sample JSON data
   ```json
