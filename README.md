@@ -16,6 +16,8 @@ The tool tries to mitigate those problems by performing psuedo localization of e
 ## What is possible today?
 * Endpoint to pass a JSON with english strings and get back a JSON with psuedo localized strings.
 * Command line utility to psuedo localize entire JSON files.
+* Language-specific pseudo-localization (e.g., German, French, Japanese)
+* Content-type–aware expansion (ui, marketing, technical, legal)
 
 ## To Implement
 * Run on change to JSON file with english translation and generate psuedo localized file.
@@ -38,7 +40,18 @@ To try the server
   ```bash
   curl http://localhost:1234/translate --include --header "Content-Type: application/json" --data '{"HELLO": "Hello, this is rakshith", "tITLE": "the coolest developer tool"}'
   ```
-
+4. ```bash
+   curl http://localhost:1234/localize \
+  --header "Content-Type: application/json" \
+  --data '{
+    "strings": {
+      "HELLO": "He",
+      "LONG_TEXT": "the coolest developer tool"
+    },
+    "language": "de",
+    "content_type": "ui"
+  }'
+```
   - Sample JSON data
   ```json
   {
@@ -49,6 +62,12 @@ To try the server
   }
   ```
 
+## Use case
+✅ UI layout testing before real translations
+✅ Finding overflow bugs in multi-language apps
+✅ Mimicking real-world string growth for different content types
+✅ Creating internal tooling that behaves like actual localization platforms
+
 To try the cli
 --------------
 1. Clone the repo, navigate to the `depslo` directory.
@@ -56,3 +75,6 @@ To try the cli
 3. `go run depslo.go ../test/cli/test.json`.
   - It should output: `The psuedo local converted JSON file is at depslo.json`.
 4. You can now see that the `depslo.json` has psuedo localized content.
+
+🛠️ Contributing
+Pull requests and issues are welcome!
