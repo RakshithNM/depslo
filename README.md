@@ -41,15 +41,16 @@ To try the server
   curl http://localhost:1234/translate --include --header "Content-Type: application/json" --data '{"HELLO": "Hello, this is rakshith", "tITLE": "the coolest developer tool"}'
   ```
 4. ```bash
-   curl http://localhost:1234/localize \--header "Content-Type: application/json" \ --data '{
-   "strings": {
+   curl http://localhost:1234/localize \
+  --header "Content-Type: application/json" \
+  --data '{
+    "strings": {
       "HELLO": "He",
       "LONG_TEXT": "the coolest developer tool"
     },
     "language": "de",
-    "content_type": "ui" }'
-  ```
-
+    "content_type": "ui"
+  }'
 ```
   - Sample JSON data
   ```json
