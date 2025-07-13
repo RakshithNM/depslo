@@ -1,6 +1,4 @@
-/*
- * DEPSLO core
- */
+// Package core
 package core
 
 import (
@@ -10,11 +8,77 @@ import (
 	"strings"
 )
 
+// advanced pseudo localized text generation
+func generatePseudoText(originalText string, expansionRate float64) string {
+	if originalText == "" {
+		return ""
+	}
+
+	// Calculate target length
+	targetLength := int(float64(len(originalText)) * expansionRate)
+
+	// Generate pseudo text
+	result := strings.Builder{}
+	for _, s := range originalText {
+		key := rune(s)
+		_, isPresent := LETTERS[key]
+		if isPresent {
+			result.WriteRune(LETTERS[key])
+		}
+	}
+	var elongatedString string
+	translatedString := result.String()
+	fmt.Println(translatedString, len(translatedString), "1")
+	if len(translatedString) > 0 {
+		elongatedString = elongateToLength(translatedString, targetLength)
+		fmt.Println(elongatedString, "2")
+	} else {
+		fmt.Println("here")
+		elongatedString = translatedString
+	}
+	fmt.Println(elongatedString, "3")
+	result.WriteString(elongatedString)
+	return result.String()
+}
+
+// PseudoLocalizeAdvanced - Advanced pseudolocalization function
+func PseudoLocalizeAdvanced(inJSON map[string]string, inLanguage string, inContentType string) map[string]string {
+	// Default values
+	language := "es"
+	if inLanguage == "" {
+		language = "es" // Default to Spanish
+	}
+	contentType := "ui"
+	if inContentType == "" {
+		contentType = "ui" // Default to UI content
+	}
+
+	// Get language configuration
+	config := GetDefaultConfig()
+	langConfig, exists := config.Languages[language]
+	fmt.Println(langConfig, "1")
+	if !exists {
+		return nil
+	}
+
+	// Process strings
+	pseudoStrings := make(map[string]string)
+
+	for key, text := range inJSON {
+		expansionRate := langConfig.CalculateExpansionRate(len(text), contentType)
+		pseudoText := generatePseudoText(text, expansionRate)
+
+		pseudoStrings[key] = pseudoText
+	}
+
+	return pseudoStrings
+}
+
 // Propose a length for the psuedoLocalization of string
 func proposeLength(inString string) int {
 	// To read values from LENGTHINCREASEMAP in order
 	keys := make([]int, 0)
-	for k, _ := range LENGTHINCREASEMAP {
+	for k := range LENGTHINCREASEMAP {
 		keys = append(keys, k)
 	}
 	sort.Ints(keys)
