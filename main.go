@@ -40,6 +40,7 @@ func localize(c *gin.Context) {
 }
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.POST("/translate", translate)
 	router.POST("/localize", localize)
