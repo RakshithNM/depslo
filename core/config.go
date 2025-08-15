@@ -116,7 +116,8 @@ func (lc LanguageConfig) CalculateExpansionRate(textLength int, contentType stri
 	w := lengthWeight(textLength)
 	if w > 0 {
 		rate *= (1.0 + lc.ShortBonus*w)
-	} else if w < 0 {
+	}
+	else if w < 0 {
 		rate *= (1.0 + lc.LongPenalty*w) // w is negative => reduces rate
 	}
 
@@ -134,4 +135,3 @@ func (lc LanguageConfig) CalculateExpansionRate(textLength int, contentType stri
 	}
 	return rate
 }
-

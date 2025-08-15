@@ -10,40 +10,44 @@ import (
 
 // transform to exact target length by trimming or padding (rune-aware)
 func transformTextToTargetLength(s string, targetLen int) string {
-    r := []rune(s)
-    if len(r) == targetLen {
-        return s
-    }
-    if len(r) > targetLen {
-        return string(r[:targetLen]) // contract
-    }
-    // expand
-    paddingChar := '⬤'
-    pad := make([]rune, targetLen-len(r))
-    for i := range pad { pad[i] = paddingChar }
-    return s + string(pad)
+	r := []rune(s)
+	if len(r) == targetLen {
+		return s
+	}
+	if len(r) > targetLen {
+		return string(r[:targetLen]) // contract
+	}
+	// expand
+	paddingChar := '⬤'
+	pad := make([]rune, targetLen-len(r))
+	for i := range pad {
+		pad[i] = paddingChar
+	}
+	return s + string(pad)
 }
 
 // Advanced pseudo localized text generation
 func generatePseudoText(originalText string, expansionRate float64) string {
-    if originalText == "" {
-        return ""
-    }
-    // map characters
-    var b strings.Builder
-    for _, ch := range originalText {
-        if val, ok := LETTERS[ch]; ok {
-            b.WriteRune(val)
-        } else {
-            b.WriteRune(ch)
-        }
-    }
-    translated := b.String()
+	if originalText == "" {
+		return ""
+	}
+	// map characters
+	var b strings.Builder
+	for _, ch := range originalText {
+		if val, ok := LETTERS[ch]; ok {
+			b.WriteRune(val)
+		} else {
+			b.WriteRune(ch)
+		}
+	}
+	translated := b.String()
 
-    // compute target (rune-based) and adjust both ways
-    target := int(float64(utf8.RuneCountInString(originalText)) * expansionRate)
-    if target < 0 { target = 0 }
-    return transformTextToTargetLength(translated, target)
+	// compute target (rune-based) and adjust both ways
+	target := int(float64(utf8.RuneCountInString(originalText)) * expansionRate)
+	if target < 0 {
+		target = 0
+	}
+	return transformTextToTargetLength(translated, target)
 }
 
 // PseudoLocalizeAdvanced - Advanced pseudo localization function
@@ -65,7 +69,8 @@ func PseudoLocalizeAdvanced(inJSON map[string]string, inLanguage, inContentType 
 	if !ok {
 		if fallback, ok2 := cfg.Languages["es"]; ok2 {
 			langConfig = fallback
-		} else {
+		}
+		else {
 			// last resort: just return input unchanged
 			out := make(map[string]string, len(inJSON))
 			for k, v := range inJSON { out[k] = v }
@@ -136,4 +141,3 @@ func PseudoLocalize(inJSON map[string]string) map[string]string {
 	}
 	return out
 }
-
