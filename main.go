@@ -8,14 +8,14 @@ import (
 	core "github.com/RakshithNM/depslo/core"
 )
 
-// TranslationRequest represents the incoming request structure
-type TranslationRequest struct {
+// LocalizationRequest represents the incoming request structure
+type LocalizationRequest struct {
 	Strings     map[string]string `json:"strings"`
 	Language    string            `json:"language"`     // Target language code
 	ContentType string            `json:"content_type"` // ui, technical, marketing, legal
 }
 
-// Gin route handler to PsuedoLocalise passsed in JSON string
+// Gin route handler to Pseudo localise passed in JSON string
 func translate(c *gin.Context) {
 	var inputStrings map[string]string
 
@@ -23,13 +23,13 @@ func translate(c *gin.Context) {
 		return
 	}
 
-	// PsuedoLocalize the JSON passed in to the endpoint, use the depslo core PsuedoLocalize function
-	c.IndentedJSON(http.StatusOK, core.PsuedoLocalize(inputStrings))
+	// Pseudo localize the JSON passed in to the endpoint, use the Depslo core pseudo localize function
+	c.IndentedJSON(http.StatusOK, core.PseudoLocalize(inputStrings))
 }
 
-// Gin route handler to PsuedoLocalise passsed in JSON string
+// Gin route handler to Pseudo localise passed in JSON string
 func localize(c *gin.Context) {
-	var req TranslationRequest
+	var req LocalizationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

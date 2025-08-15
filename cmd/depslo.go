@@ -116,8 +116,8 @@ func main() {
 			// Check and exit gracefully if there was an error
 			check(errSyntaxCheck)
 
-			// Call the PsuedoLocalize function from the depslo core package(~root/core)
-			psuedoLocalContent := core.PsuedoLocalize(fileContent)
+			// Call the PseudoLocalize function from the depslo core package(~root/core)
+			psuedoLocalContent := core.PseudoLocalize(fileContent)
 
 			// Write the psuedo localized JSON value to a file and return the file path for printing
 			writtenFilePath, err := writeToJSONFile(psuedoLocalContent)

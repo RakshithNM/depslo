@@ -19,7 +19,7 @@ func transformTextToLength(s string, targetLen int) string {
 	return s + padding
 }
 
-// advanced pseudo localized text generation
+// Advanced pseudo localized text generation
 func generatePseudoText(originalText string, expansionRate float64) string {
 	if originalText == "" {
 		return ""
@@ -44,7 +44,7 @@ func generatePseudoText(originalText string, expansionRate float64) string {
 	return elongated
 }
 
-// PseudoLocalizeAdvanced - Advanced pseudolocalization function
+// PseudoLocalizeAdvanced - Advanced pseudo localization function
 func PseudoLocalizeAdvanced(inJSON map[string]string, inLanguage string, inContentType string) map[string]string {
 	// Default values
 	language := "es"
@@ -76,7 +76,7 @@ func PseudoLocalizeAdvanced(inJSON map[string]string, inLanguage string, inConte
 	return pseudoStrings
 }
 
-// Propose a length for the psuedoLocalization of string
+// Propose a length for the pseudo localization of string
 func proposeLength(inString string) int {
 	// To read values from LENGTHINCREASEMAP in order
 	keys := make([]int, 0)
@@ -116,8 +116,8 @@ func elongateToLength(inString string, inLength int) string {
 	return localElongatedString
 }
 
-// PsuedoLocalize the JSON
-func PsuedoLocalize(inJSON map[string]string) map[string]string {
+// PseudoLocalize the JSON
+func PseudoLocalize(inJSON map[string]string) map[string]string {
 	for i := range inJSON {
 		stringToTranslate := inJSON[i]
 		proposedLength := proposeLength(stringToTranslate)
