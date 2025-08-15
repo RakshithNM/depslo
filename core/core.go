@@ -2,99 +2,101 @@
 package core
 
 import (
-	"bytes"
 	"fmt"
 	"sort"
 	"strings"
 	"unicode/utf8"
 )
 
-func transformTextToLength(s string, targetLen int) string {
-	if utf8.RuneCountInString(s) >= targetLen {
-		return s
-	}
-	paddingChar := '⬤' // or any filler
-	diff := targetLen - utf8.RuneCountInString(s)
-	padding := strings.Repeat(string(paddingChar), diff)
-	return s + padding
+// transform to exact target length by trimming or padding (rune-aware)
+func transformTextToTargetLength(s string, targetLen int) string {
+    r := []rune(s)
+    if len(r) == targetLen {
+        return s
+    }
+    if len(r) > targetLen {
+        return string(r[:targetLen]) // contract
+    }
+    // expand
+    paddingChar := '⬤'
+    pad := make([]rune, targetLen-len(r))
+    for i := range pad { pad[i] = paddingChar }
+    return s + string(pad)
 }
 
 // Advanced pseudo localized text generation
 func generatePseudoText(originalText string, expansionRate float64) string {
-	if originalText == "" {
-		return ""
-	}
+    if originalText == "" {
+        return ""
+    }
+    // map characters
+    var b strings.Builder
+    for _, ch := range originalText {
+        if val, ok := LETTERS[ch]; ok {
+            b.WriteRune(val)
+        } else {
+            b.WriteRune(ch)
+        }
+    }
+    translated := b.String()
 
-	// Calculate target length
-	targetLength := int(float64(utf8.RuneCountInString(originalText)) * expansionRate)
-
-	// Generate pseudo-translated string
-	var translatedBuilder strings.Builder
-	for _, s := range originalText {
-		if val, ok := LETTERS[s]; ok {
-			translatedBuilder.WriteRune(val)
-		} else {
-			translatedBuilder.WriteRune(s)
-		}
-	}
-	translated := translatedBuilder.String()
-
-	// Elongate to target length
-	elongated := transformTextToLength(translated, targetLength)
-	return elongated
+    // compute target (rune-based) and adjust both ways
+    target := int(float64(utf8.RuneCountInString(originalText)) * expansionRate)
+    if target < 0 { target = 0 }
+    return transformTextToTargetLength(translated, target)
 }
 
 // PseudoLocalizeAdvanced - Advanced pseudo localization function
-func PseudoLocalizeAdvanced(inJSON map[string]string, inLanguage string, inContentType string) map[string]string {
-	// Default values
+func PseudoLocalizeAdvanced(inJSON map[string]string, inLanguage, inContentType string) map[string]string {
+	// defaults
 	language := "es"
-	if inLanguage == "" {
-		language = "es" // Default to Spanish
+	if inLanguage != "" {
+		language = strings.ToLower(inLanguage)
 	}
 	contentType := "ui"
-	if inContentType == "" {
-		contentType = "ui" // Default to UI content
+	if inContentType != "" {
+		contentType = strings.ToLower(inContentType)
 	}
 
-	// Get language configuration
-	config := GetDefaultConfig()
-	langConfig, exists := config.Languages[language]
-	if !exists {
-		return nil
+	cfg := GetDefaultConfig()
+
+	// try chosen language, fallback to ES if missing
+	langConfig, ok := cfg.Languages[language]
+	if !ok {
+		if fallback, ok2 := cfg.Languages["es"]; ok2 {
+			langConfig = fallback
+		} else {
+			// last resort: just return input unchanged
+			out := make(map[string]string, len(inJSON))
+			for k, v := range inJSON { out[k] = v }
+			return out
+		}
 	}
 
-	// Process strings
-	pseudoStrings := make(map[string]string)
-
+	out := make(map[string]string, len(inJSON))
 	for key, text := range inJSON {
-		expansionRate := langConfig.CalculateExpansionRate(utf8.RuneCountInString(text), contentType)
-		pseudoText := generatePseudoText(text, expansionRate)
-
-		pseudoStrings[key] = pseudoText
+		rate := langConfig.CalculateExpansionRate(utf8.RuneCountInString(text), contentType)
+		out[key] = generatePseudoText(text, rate) // see #2
 	}
-
-	return pseudoStrings
+	return out
 }
 
 // Propose a length for the pseudo localization of string
-func proposeLength(inString string) int {
-	// To read values from LENGTHINCREASEMAP in order
-	keys := make([]int, 0)
-	for k := range LENGTHINCREASEMAP {
-		keys = append(keys, k)
-	}
+func proposeLength(s string) int {
+	// LENGTHINCREASEMAP keys presumably refer to original length “buckets”.
+	// Use rune count, not bytes.
+	n := utf8.RuneCountInString(s)
+
+	keys := make([]int, 0, len(LENGTHINCREASEMAP))
+	for k := range LENGTHINCREASEMAP { keys = append(keys, k) }
 	sort.Ints(keys)
 
-	length := len(inString)
 	for _, key := range keys {
-		if length > key {
-			continue
+		if n <= key {
+			return LENGTHINCREASEMAP[key][1]
 		}
-		return LENGTHINCREASEMAP[key][1]
 	}
-	// proposing longest length
-	// TODO: maybe should be randomised to return a number within the range(pending research)
-	return LENGTHINCREASEMAP[10][1]
+	return LENGTHINCREASEMAP[10][1] // your existing “longest” bucket
 }
 
 // Elongate the string to the desired length
@@ -118,25 +120,20 @@ func elongateToLength(inString string, inLength int) string {
 
 // PseudoLocalize the JSON
 func PseudoLocalize(inJSON map[string]string) map[string]string {
-	for i := range inJSON {
-		stringToTranslate := inJSON[i]
-		proposedLength := proposeLength(stringToTranslate)
-		var translatedBuffer bytes.Buffer
-		for _, s := range stringToTranslate {
-			key := rune(s)
-			_, isPresent := LETTERS[key]
-			if isPresent {
-				translatedBuffer.WriteRune(LETTERS[key])
+	out := make(map[string]string, len(inJSON))
+	for k, v := range inJSON {
+		// proposeLength should be rune-based
+		proposed := proposeLength(v) // consider switching proposeLength to use utf8.RuneCountInString
+		var b strings.Builder
+		for _, ch := range v {
+			if repl, ok := LETTERS[ch]; ok {
+				b.WriteRune(repl)
+			} else {
+				b.WriteRune(ch) // don't drop punctuation/whitespace
 			}
 		}
-		var elongatedString string
-		if len(translatedBuffer.String()) > 0 {
-			translatedString := translatedBuffer.String()
-			elongatedString = elongateToLength(translatedString, proposedLength)
-		} else {
-			elongatedString = stringToTranslate
-		}
-		inJSON[i] = elongatedString
+		out[k] = transformTextToTargetLength(b.String(), proposed)
 	}
-	return inJSON
+	return out
 }
+
