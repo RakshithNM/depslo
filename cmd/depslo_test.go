@@ -59,6 +59,12 @@ func Test_checkIfValidFile(t *testing.T) {
 	// Once all the tests are done. We delete the temporal file
 	defer os.Remove(tmpfile.Name())
 	// Defining the struct we're going to use
+	tmpDir, err := ioutil.TempDir("", "tester.dir.*.json")
+	if err != nil {
+		panic(err) // This should never happen
+	}
+	defer os.RemoveAll(tmpDir)
+
 	tests := []struct {
 		name     string
 		filename string
@@ -68,6 +74,7 @@ func Test_checkIfValidFile(t *testing.T) {
 		{"File does exist", tmpfile.Name(), true, false},
 		{"File does not exist", "nowhere/test.csv", false, true},
 		{"File is not json", "test.txt", false, true},
+		{"Path is not a regular file", tmpDir, false, true},
 	}
 	// Iterating over our test cases
 	for _, tt := range tests {
@@ -107,6 +114,7 @@ func Test_processJSONFile(t *testing.T) {
 		wantErr bool   // The value of our JSON file entry
 	}{
 		{"Valid JSON file", string(validJSON[:]), false},
+		{"Invalid JSON file", "{invalid json", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -129,12 +137,56 @@ func Test_processJSONFile(t *testing.T) {
 
 			// Check if the valid JSON file created is actually valid using our function
 			jsonData, err := processJSONFile(filePath)
-
+			if (err != nil) != tt.wantErr {
+				t.Errorf("processJSONFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
 			if err == nil {
 				if !reflect.DeepEqual(jsonData, validTestJSONData) {
 					t.Errorf("processJSONFile() = %v, want %v", jsonData, validTestJSONData)
 				}
 			}
 		})
+	}
+}
+
+func Test_processJSONFile_readError(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("", "reader.*.json")
+	if err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	_, readErr := processJSONFile(tmpDir)
+	if readErr == nil {
+		t.Fatalf("processJSONFile() expected read error for directory path")
+	}
+}
+
+func Test_writeToJSONFile_writeError(t *testing.T) {
+	origWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd failed: %v", err)
+	}
+
+	tmpDir, err := ioutil.TempDir("", "depslo.ro.*")
+	if err != nil {
+		t.Fatalf("TempDir failed: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	if chmodErr := os.Chmod(tmpDir, 0500); chmodErr != nil {
+		t.Fatalf("Chmod failed: %v", chmodErr)
+	}
+	defer os.Chmod(tmpDir, 0700)
+
+	if chdirErr := os.Chdir(tmpDir); chdirErr != nil {
+		t.Fatalf("Chdir failed: %v", chdirErr)
+	}
+	defer os.Chdir(origWd)
+
+	_, writeErr := writeToJSONFile(map[string]string{"HELLO": "Hello"})
+	if writeErr == nil {
+		t.Fatalf("writeToJSONFile() expected error when directory is not writable")
 	}
 }

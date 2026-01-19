@@ -36,8 +36,12 @@ func checkIfValidFile(filename string) (bool, error) {
 	}
 
 	// Checking if filepath entered belongs to an existing file. We use the Stat method from the os package (standard library)
-	if _, err := os.Stat(filename); err != nil && os.IsNotExist(err) {
-		return false, fmt.Errorf("File %s does not exist", filename)
+	info, err := os.Stat(filename)
+	if err != nil {
+		return false, fmt.Errorf("File %s is not accessible: %w", filename, err)
+	}
+	if !info.Mode().IsRegular() {
+		return false, fmt.Errorf("File %s is not a regular file", filename)
 	}
 	// If we get to this point, it means this is a valid file
 	return true, nil
@@ -60,21 +64,15 @@ func check(e error) {
 func processJSONFile(filePath string) (map[string]string, error) {
 	// Read the file
 	file, err := ioutil.ReadFile(filePath)
-	check(err)
+	if err != nil {
+		return nil, err
+	}
 
 	var data map[string]string
 
 	// Unmarshall to a map to see if there are any errors in JSON content
-	jErr := json.Unmarshal(file, &data)
-
-	if jErr != nil {
-		switch jsErr := jErr.(type) {
-		case *json.SyntaxError:
-			fmt.Printf("Error in input syntax at byte %d: %s\n", jsErr.Offset, jsErr.Error())
-			break
-		default:
-			fmt.Printf("Other error decoding JSON: %s\n", jsErr.Error())
-		}
+	if err := json.Unmarshal(file, &data); err != nil {
+		return nil, err
 	}
 	return data, nil
 }
@@ -84,16 +82,14 @@ func writeToJSONFile(contentToWrite map[string]string) (string, error) {
 	// Make indented JSON value out of the content passed in
 	jsonValue, marshalErr := json.MarshalIndent(contentToWrite, "", "\t")
 	if marshalErr != nil {
-		fmt.Printf("%v\n", marshalErr)
+		return "", marshalErr
 	}
 
 	outputFile := "depslo.json"
 
 	// Write the JSON value to a file
-	fileWrtingErr := ioutil.WriteFile(outputFile, jsonValue, 0644)
-
-	if fileWrtingErr != nil {
-		return "", errors.New("File path is empty")
+	if err := ioutil.WriteFile(outputFile, jsonValue, 0644); err != nil {
+		return "", err
 	}
 	return outputFile, nil
 }

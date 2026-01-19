@@ -69,8 +69,7 @@ func PseudoLocalizeAdvanced(inJSON map[string]string, inLanguage, inContentType 
 	if !ok {
 		if fallback, ok2 := cfg.Languages["es"]; ok2 {
 			langConfig = fallback
-		}
-		else {
+		} else {
 			// last resort: just return input unchanged
 			out := make(map[string]string, len(inJSON))
 			for k, v := range inJSON { out[k] = v }
@@ -125,19 +124,16 @@ func elongateToLength(inString string, inLength int) string {
 
 // PseudoLocalize the JSON
 func PseudoLocalize(inJSON map[string]string) map[string]string {
+	cfg := GetDefaultConfig()
+	langConfig, ok := cfg.Languages["es"]
+	if !ok {
+		langConfig = LanguageConfig{BaseExpansion: 1.25, MinRate: 1.0, MaxRate: 2.0}
+	}
+
 	out := make(map[string]string, len(inJSON))
 	for k, v := range inJSON {
-		// proposeLength should be rune-based
-		proposed := proposeLength(v) // consider switching proposeLength to use utf8.RuneCountInString
-		var b strings.Builder
-		for _, ch := range v {
-			if repl, ok := LETTERS[ch]; ok {
-				b.WriteRune(repl)
-			} else {
-				b.WriteRune(ch) // don't drop punctuation/whitespace
-			}
-		}
-		out[k] = transformTextToTargetLength(b.String(), proposed)
+		rate := langConfig.CalculateExpansionRate(utf8.RuneCountInString(v), "ui")
+		out[k] = generatePseudoText(v, rate)
 	}
 	return out
 }

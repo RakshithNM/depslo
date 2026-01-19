@@ -25,61 +25,61 @@ func GetDefaultConfig() PseudoLocalizationConfig {
 			"es": {
 				Code:          "es",
 				Name:          "Spanish",
-				BaseExpansion: 1.25,
-				ShortBonus:    0.60,  // was 0.75; still strong but proportional now
-				LongPenalty:   0.10,
-				MinRate:       0.85,
-				MaxRate:       2.40,
+				BaseExpansion: 1.25, // ~25% expansion vs English (common UI guidance)
+				ShortBonus:    0.35, // short UI strings expand more
+				LongPenalty:   0.10, // long strings expand less
+				MinRate:       1.05,
+				MaxRate:       1.75,
 				ContentTypes: map[string]float64{
 					"ui":        1.00,
-					"technical": 0.90,
+					"technical": 1.05,
 					"marketing": 1.10,
-					"legal":     0.95,
+					"legal":     1.15,
 				},
 			},
 			"de": {
 				Code:          "de",
 				Name:          "German",
-				BaseExpansion: 1.30,
-				ShortBonus:    0.80,  // German short strings balloon a lot
-				LongPenalty:   0.15,
-				MinRate:       0.90,
-				MaxRate:       2.60,
+				BaseExpansion: 1.32, // ~30%+ expansion vs English
+				ShortBonus:    0.45,
+				LongPenalty:   0.12,
+				MinRate:       1.10,
+				MaxRate:       1.85,
 				ContentTypes: map[string]float64{
 					"ui":        1.00,
-					"technical": 0.90,
-					"marketing": 1.20,
-					"legal":     0.95,
+					"technical": 1.08,
+					"marketing": 1.12,
+					"legal":     1.18,
 				},
 			},
 			"fr": {
 				Code:          "fr",
 				Name:          "French",
-				BaseExpansion: 1.23,
-				ShortBonus:    0.55,
-				LongPenalty:   0.08,
-				MinRate:       0.85,
-				MaxRate:       2.30,
+				BaseExpansion: 1.25, // ~25% expansion vs English
+				ShortBonus:    0.35,
+				LongPenalty:   0.10,
+				MinRate:       1.05,
+				MaxRate:       1.70,
 				ContentTypes: map[string]float64{
 					"ui":        1.00,
-					"technical": 0.92,
-					"marketing": 1.08,
-					"legal":     0.95,
+					"technical": 1.05,
+					"marketing": 1.10,
+					"legal":     1.12,
 				},
 			},
 			"zh": {
 				Code:          "zh",
 				Name:          "Chinese",
-				BaseExpansion: 0.85,  // contraction baseline
-				ShortBonus:    0.20,  // small relief for very short strings
-				LongPenalty:   0.05,  // slightly more contraction on long text
-				MinRate:       0.60,  // allow visible contraction
-				MaxRate:       1.60,
+				BaseExpansion: 0.78, // typical contraction vs English
+				ShortBonus:    0.20,
+				LongPenalty:   0.10,
+				MinRate:       0.60,
+				MaxRate:       1.00,
 				ContentTypes: map[string]float64{
 					"ui":        1.00,
-					"technical": 1.00,
-					"marketing": 0.95, // marketing tends to be concise in zh
-					"legal":     1.00,
+					"technical": 0.95,
+					"marketing": 0.92,
+					"legal":     0.98,
 				},
 			},
 		},
@@ -116,8 +116,7 @@ func (lc LanguageConfig) CalculateExpansionRate(textLength int, contentType stri
 	w := lengthWeight(textLength)
 	if w > 0 {
 		rate *= (1.0 + lc.ShortBonus*w)
-	}
-	else if w < 0 {
+	} else if w < 0 {
 		rate *= (1.0 + lc.LongPenalty*w) // w is negative => reduces rate
 	}
 
