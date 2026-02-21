@@ -3,14 +3,14 @@ package core
 import "math"
 
 type LanguageConfig struct {
-	Code           string             `json:"code"`
-	Name           string             `json:"name"`
-	BaseExpansion  float64            `json:"base_expansion"`  // neutral medium length factor (1.0 = same length, 1.25 = +25%)
-	ShortBonus     float64            `json:"short_bonus"`     // multiplier strength applied for short strings (as a % of base)
-	LongPenalty    float64            `json:"long_penalty"`    // multiplier strength applied for long strings (as a % of base)
-	MinRate        float64            `json:"min_rate"`        // language-specific floor
-	MaxRate        float64            `json:"max_rate"`        // language-specific ceiling
-	ContentTypes   map[string]float64 `json:"content_types"`   // extra multiplier per content-type
+	Code          string             `json:"code"`
+	Name          string             `json:"name"`
+	BaseExpansion float64            `json:"base_expansion"` // neutral medium length factor (1.0 = same length, 1.25 = +25%)
+	ShortBonus    float64            `json:"short_bonus"`    // multiplier strength applied for short strings (as a % of base)
+	LongPenalty   float64            `json:"long_penalty"`   // multiplier strength applied for long strings (as a % of base)
+	MinRate       float64            `json:"min_rate"`       // language-specific floor
+	MaxRate       float64            `json:"max_rate"`       // language-specific ceiling
+	ContentTypes  map[string]float64 `json:"content_types"`  // extra multiplier per content-type
 }
 
 // PseudoLocalizationConfig holds all language configurations
@@ -25,11 +25,11 @@ func GetDefaultConfig() PseudoLocalizationConfig {
 			"es": {
 				Code:          "es",
 				Name:          "Spanish",
-				BaseExpansion: 1.25, // ~25% expansion vs English (common UI guidance)
-				ShortBonus:    0.35, // short UI strings expand more
-				LongPenalty:   0.10, // long strings expand less
+				BaseExpansion: 1.30, // medium strings trend around +30% vs English
+				ShortBonus:    0.55, // short UI strings can approach/exceed 2x
+				LongPenalty:   0.12, // long strings expand less
 				MinRate:       1.05,
-				MaxRate:       1.75,
+				MaxRate:       2.10,
 				ContentTypes: map[string]float64{
 					"ui":        1.00,
 					"technical": 1.05,
@@ -40,11 +40,11 @@ func GetDefaultConfig() PseudoLocalizationConfig {
 			"de": {
 				Code:          "de",
 				Name:          "German",
-				BaseExpansion: 1.32, // ~30%+ expansion vs English
-				ShortBonus:    0.45,
+				BaseExpansion: 1.35, // medium strings trend around +30% to +35%
+				ShortBonus:    0.55,
 				LongPenalty:   0.12,
 				MinRate:       1.10,
-				MaxRate:       1.85,
+				MaxRate:       2.20,
 				ContentTypes: map[string]float64{
 					"ui":        1.00,
 					"technical": 1.08,
@@ -55,31 +55,31 @@ func GetDefaultConfig() PseudoLocalizationConfig {
 			"fr": {
 				Code:          "fr",
 				Name:          "French",
-				BaseExpansion: 1.25, // ~25% expansion vs English
-				ShortBonus:    0.35,
-				LongPenalty:   0.10,
+				BaseExpansion: 1.30, // medium strings trend around +30% vs English
+				ShortBonus:    0.55,
+				LongPenalty:   0.12,
 				MinRate:       1.05,
-				MaxRate:       1.70,
+				MaxRate:       2.10,
 				ContentTypes: map[string]float64{
 					"ui":        1.00,
 					"technical": 1.05,
 					"marketing": 1.10,
-					"legal":     1.12,
+					"legal":     1.15,
 				},
 			},
 			"zh": {
 				Code:          "zh",
 				Name:          "Chinese",
-				BaseExpansion: 0.78, // typical contraction vs English
-				ShortBonus:    0.20,
+				BaseExpansion: 0.88, // often contracts vs English, but not universally
+				ShortBonus:    0.25,
 				LongPenalty:   0.10,
-				MinRate:       0.60,
-				MaxRate:       1.00,
+				MinRate:       0.65,
+				MaxRate:       1.15,
 				ContentTypes: map[string]float64{
 					"ui":        1.00,
-					"technical": 0.95,
+					"technical": 0.98,
 					"marketing": 0.92,
-					"legal":     0.98,
+					"legal":     1.03,
 				},
 			},
 		},
@@ -87,9 +87,10 @@ func GetDefaultConfig() PseudoLocalizationConfig {
 }
 
 // lengthWeight returns a value in [-1..1] describing how “short” or “long” the string is.
-//   +1.0  = very short (<=5 chars)
-//    0.0  = medium (31..100 chars)
-//   -1.0  = very long (> 100 chars)
+//
+//	+1.0  = very short (<=5 chars)
+//	 0.0  = medium (31..100 chars)
+//	-1.0  = very long (> 100 chars)
 func lengthWeight(n int) float64 {
 	switch {
 	case n <= 5:

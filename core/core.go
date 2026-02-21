@@ -3,6 +3,7 @@ package core
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 	"unicode/utf8"
@@ -42,10 +43,21 @@ func generatePseudoText(originalText string, expansionRate float64) string {
 	}
 	translated := b.String()
 
-	// compute target (rune-based) and adjust both ways
-	target := int(float64(utf8.RuneCountInString(originalText)) * expansionRate)
+	// compute target (rune-based):
+	// - expansion uses ceil so small labels do not under-expand due to truncation
+	// - contraction uses floor
+	srcLen := utf8.RuneCountInString(originalText)
+	rawTarget := float64(srcLen) * expansionRate
+	target := int(math.Floor(rawTarget))
+	if expansionRate >= 1.0 {
+		target = int(math.Ceil(rawTarget))
+	}
+
 	if target < 0 {
 		target = 0
+	}
+	if srcLen > 0 && target == 0 {
+		target = 1
 	}
 	return transformTextToTargetLength(translated, target)
 }
@@ -72,7 +84,9 @@ func PseudoLocalizeAdvanced(inJSON map[string]string, inLanguage, inContentType 
 		} else {
 			// last resort: just return input unchanged
 			out := make(map[string]string, len(inJSON))
-			for k, v := range inJSON { out[k] = v }
+			for k, v := range inJSON {
+				out[k] = v
+			}
 			return out
 		}
 	}
@@ -92,7 +106,9 @@ func proposeLength(s string) int {
 	n := utf8.RuneCountInString(s)
 
 	keys := make([]int, 0, len(LENGTHINCREASEMAP))
-	for k := range LENGTHINCREASEMAP { keys = append(keys, k) }
+	for k := range LENGTHINCREASEMAP {
+		keys = append(keys, k)
+	}
 	sort.Ints(keys)
 
 	for _, key := range keys {
